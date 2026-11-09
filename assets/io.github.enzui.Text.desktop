@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Text
+GenericName=Text Editor
+GenericName[de]=Texteditor
+Comment=Edit plain text and source files
+Comment[de]=Text- und Quellcodedateien bearbeiten
+Exec=text-app %U
+TryExec=text-app
+Icon=io.github.enzui.Text
+Terminal=false
+StartupNotify=true
+SingleMainWindow=true
+StartupWMClass=io.github.enzui.Text
+Categories=Utility;TextEditor;
+Keywords=text;editor;plaintext;source;code;notepad;
+Keywords[de]=Text;Editor;Klartext;Quelltext;Code;Notizen;
+MimeType=text/plain;text/markdown;text/rust;application/toml;application/json;application/yaml;text/x-shellscript;text/x-python;text/x-csrc;text/x-chdr;text/x-c++src;text/javascript;text/html;text/css;application/xml;text/x-log;

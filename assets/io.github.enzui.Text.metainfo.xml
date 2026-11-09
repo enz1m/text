@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.enzui.Text</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Text</name>
+  <name xml:lang="de">Text</name>
+  <summary>Edit plain text and source files</summary>
+  <summary xml:lang="de">Text- und Quellcodedateien bearbeiten</summary>
+  <description>
+    <p>
+      Text is a lightweight editor for plain text and source files. It opens
+      files given on the command line and through a file chooser. UTF-8 documents
+      are editable; binary and undecodable data use read-only previews.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>
+        Crash recovery: unsaved changes in dirty or untitled buffers are
+        written to a private per-user state file off the edit path and are
+        offered for restoration on the next launch after an unclean exit,
+        without overwriting the file on disk.
+      </li>
+      <li>
+        Printing: the active document is rendered to PostScript and sent to a
+        printer through the desktop print portal. Characters outside Latin-1 are
+        refused rather than substituted; when no portal is available
+        the attempt reports that instead of failing silently.
+      </li>
+      <li>Find and replace, go to line, and document statistics.</li>
+      <li>Tab/Shift+Tab indentation and line-ending controls.</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.enzui.Text.desktop</launchable>
+  <provides>
+    <binary>text-app</binary>
+  </provides>
+  <categories>
+    <category>Utility</category>
+    <category>TextEditor</category>
+  </categories>
+  <keywords>
+    <keyword>text</keyword>
+    <keyword>editor</keyword>
+    <keyword>source</keyword>
+    <keyword>code</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <developer id="io.github.enzui">
+    <name>enzUI contributors</name>
+  </developer>
+  <releases>
+    <release version="0.1.0" date="2026-11-11"/>
+  </releases>
+</component>
