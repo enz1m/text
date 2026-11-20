@@ -50,19 +50,14 @@ fn discard_retires_recovery_on_disk_and_survives_a_stale_completion() {
         assert!(!before.is_empty());
 
         let window = iced::window::Id::unique();
-        let _ = app.begin_recovery_discard(window);
+        let task = app.begin_recovery_discard(window);
         let generation = pending_gen(&app);
         assert!(app.recovery_published.contains_key(&id));
 
-        assert!(
-            app.recovery_store
-                .publish(generation, crate::recovery::RecoverySnapshot::default())
-                .committed()
-        );
-        let _ = app.update(Message::RecoveryDiscardSettled {
-            generation,
-            result: Ok(true),
-        });
+        // The discard has already submitted its worker. Drive its actual
+        // completion so the test does not race a second writer for this generation.
+        let _ = crate::task_driver::drive_tasks(&mut app, task);
+        assert_eq!(app.recovery_store.published_generation(), generation);
         assert!(app.recovery_discard.is_none());
         assert!(app.recovery_published.is_empty());
 
