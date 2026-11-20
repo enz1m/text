@@ -1,0 +1,52 @@
+{
+  "app-id": "io.github.enzui.Text",
+  "branch": "stable",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "26.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ],
+  "command": "text-app",
+  "finish-args": [
+    "--socket=wayland",
+    "--device=dri"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin"
+  },
+  "modules": [
+    {
+      "name": "text",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --locked --offline --release --jobs \"${FLATPAK_BUILDER_N_JOBS:-2}\" --bin text-app",
+        "install -Dm755 target/release/text-app /app/bin/text-app",
+        "install -Dm644 assets/io.github.enzui.Text.desktop /app/share/applications/io.github.enzui.Text.desktop",
+        "install -Dm644 packaging/flatpak/io.github.enzui.Text.metainfo.xml /app/share/metainfo/io.github.enzui.Text.metainfo.xml",
+        "install -Dm644 assets/io.github.enzui.Text.svg /app/share/icons/hicolor/scalable/apps/io.github.enzui.Text.svg",
+        "install -Dm644 LICENSE /app/share/licenses/io.github.enzui.Text/LICENSE"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/enz1m/text.git",
+          "commit": "@ENZIM_SOURCE_COMMIT@",
+          "disable-submodules": true
+        },
+        {
+          "type": "archive",
+          "url": "https://github.com/enz1m/text/releases/download/v0.1.1/text-cargo-vendor-0.1.1.tar.xz",
+          "sha256": "ed18fd917d2d556f12bf70915fbc7581dfe1ed6cfffb757570628bbf2d7e370f",
+          "strip-components": 1
+        },
+        {
+          "type": "file",
+          "url": "https://raw.githubusercontent.com/enz1m/enzim-winit/40eeb41f8637ef1620afa377ba006874224b6d65/wayland-protocols/xdg-session-management-v1.xml",
+          "sha256": "3674591ca8e68f76297c535e8edd6783d84b59086c38ebe08ff5ff1f2dec5bae",
+          "dest": "vendor/winit-0.30.13/wayland-protocols"
+        }
+      ]
+    }
+  ]
+}
