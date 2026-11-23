@@ -7,6 +7,7 @@ pub(super) fn inert_app() -> TextApp {
     let session_write_baseline = session::persisted_snapshot(&model, &workspaces);
     TextApp {
         desktop: Default::default(),
+        startup_editor_focus: None,
         model,
         dialog_focus: None,
         settings_focus: None,

@@ -79,13 +79,17 @@ impl Driver {
             ops.extend(widget_ops(app.update(m)));
         }
         if !ops.is_empty() {
-            let cache = std::mem::take(&mut self.cache);
-            let mut ui = UserInterface::build(app.view(), self.size, cache, &mut self.renderer);
-            for op in ops {
-                run_op(&mut ui, &self.renderer, op);
-            }
-            self.cache = ui.into_cache();
+            self.operate(app, ops);
         }
+    }
+
+    fn operate(&mut self, app: &TextApp, ops: impl IntoIterator<Item = Box<dyn Operation>>) {
+        let cache = std::mem::take(&mut self.cache);
+        let mut ui = UserInterface::build(app.view(), self.size, cache, &mut self.renderer);
+        for op in ops {
+            run_op(&mut ui, &self.renderer, op);
+        }
+        self.cache = ui.into_cache();
     }
 
     pub(crate) fn feed(&mut self, app: &mut TextApp, events: Vec<iced::Event>) {
@@ -177,3 +181,61 @@ impl Driver {
 }
 
 const EDITOR_POINT: iced::Point = iced::Point::new(700.0, 450.0);
+
+fn drive_boot(driver: &mut Driver, app: &mut TextApp, task: Task<Message>) {
+    crate::task_driver::drive_tasks_observing(app, task, |app, action| match action {
+        Action::Widget(op) => driver.operate(app, [op]),
+        Action::Window(iced_test::runtime::window::Action::SetToplevelTag(_, _, result)) => {
+            let _ = result.send(false);
+        }
+        _ => {}
+    });
+}
+
+#[test]
+fn explicit_startup_file_accepts_keyboard_input_after_load() {
+    let dir = crate::test_support::TempDir::new();
+    let path = dir.write("startup.txt", b"fixture");
+    let env = BootEnv::from_parts(None, None, None, [path.into_os_string()].into_iter(), None);
+    for window_before_load in [false, true] {
+        let (mut app, boot) = TextApp::boot_at(&env);
+        let mut driver = Driver::new();
+        let window = Message::Desktop(desktop::DesktopEvent::WindowOpened(window::Id::unique()));
+        if window_before_load {
+            let opened = app.update(window.clone());
+            drive_boot(&mut driver, &mut app, opened);
+        }
+        drive_boot(&mut driver, &mut app, boot);
+        if !window_before_load {
+            let opened = app.update(window);
+            drive_boot(&mut driver, &mut app, opened);
+        }
+
+        assert!(driver.nodes(&app).iter().any(|node| {
+            node.id.as_ref() == Some(&editor_id())
+                && node.semantics.role == enzui_core::semantics::Role::TextInput
+                && node.semantics.focused
+        }));
+        driver.feed(&mut app, iced_test::simulator::typewrite("x").collect());
+        assert_eq!(app.model.active_tab().document().to_string(), "xfixture");
+    }
+}
+
+#[test]
+fn startup_load_respects_the_open_find_field() {
+    let dir = crate::test_support::TempDir::new();
+    let path = dir.write("startup.txt", b"fixture");
+    let env = BootEnv::from_parts(None, None, None, [path.into_os_string()].into_iter(), None);
+    let (mut app, boot) = TextApp::boot_at(&env);
+    let mut driver = Driver::new();
+    let opened = app.update(Message::Desktop(desktop::DesktopEvent::WindowOpened(
+        window::Id::unique(),
+    )));
+    drive_boot(&mut driver, &mut app, opened);
+    driver.apply(&mut app, vec![Message::OpenFind]);
+    drive_boot(&mut driver, &mut app, boot);
+
+    driver.feed(&mut app, iced_test::simulator::typewrite("x").collect());
+    assert_eq!(app.model.search.query, "x");
+    assert_eq!(app.model.active_tab().document().to_string(), "fixture");
+}

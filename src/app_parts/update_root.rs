@@ -43,7 +43,8 @@ impl TextApp {
         let parent = self.picker.take_parent_task();
         let task = Task::batch([task, desktop, parent]);
         let after_focus = self.sync_dialog_focus();
-        let task = Task::batch([a11y_task, before_focus, task, after_focus]);
+        let startup_focus = self.focus_startup_editor();
+        let task = Task::batch([a11y_task, before_focus, task, after_focus, startup_focus]);
         // The paged viewer's row count depends on the banners drawn above it,
         // which this message may have raised.
         self.sync_paged_visible_rows();

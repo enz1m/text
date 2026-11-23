@@ -184,6 +184,35 @@ impl TextApp {
         self.a_dialog_is_open() || self.settings_is_closing() || self.picker.is_pending()
     }
 
+    pub(crate) fn focus_startup_editor(&mut self) -> Task<Message> {
+        let Some(token) = self.startup_editor_focus else {
+            return Task::none();
+        };
+        let tab = self.model.active_tab();
+        if tab.load_token != token
+            || self.desktop_input_blocked()
+            || self.model.search.open
+            || self.model.goto_open
+            || self.model.language_menu_open
+            || self.model.overflow_menu_open
+            || self.model.tab_list_open
+            || self.workspace_context_menu.is_open()
+        {
+            self.startup_editor_focus = None;
+            return Task::none();
+        }
+        // Window creation and document loading can settle in either order.
+        if self.desktop.window.is_none() || tab.loading {
+            return Task::none();
+        }
+        self.startup_editor_focus = None;
+        if tab.file_path.is_some() && !tab.is_read_only() {
+            crate::widget_ids::focus_unclaimed_editor()
+        } else {
+            Task::none()
+        }
+    }
+
     pub(crate) fn sync_desktop_activity(&mut self) {
         let busy = self.blocking_tasks.dispatcher().snapshot().live() > 0;
         if busy && self.desktop.activity_job.is_none() {

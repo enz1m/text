@@ -1,6 +1,10 @@
 //! TextApp widget id and focus-restore helpers.
 
 use super::*;
+use iced::advanced::widget::{
+    Operation,
+    operation::{Focusable, Outcome},
+};
 
 pub(crate) fn stats_button_id() -> iced::advanced::widget::Id {
     iced::advanced::widget::Id::new("text-app.status.stats")
@@ -24,6 +28,38 @@ pub(crate) fn tab_list_button_id() -> iced::advanced::widget::Id {
 
 pub(crate) fn editor_id() -> iced::advanced::widget::Id {
     iced::advanced::widget::Id::new("text-app.editor")
+}
+
+pub(crate) fn focus_unclaimed_editor() -> Task<Message> {
+    operate(FocusUnclaimedEditor::default())
+}
+
+#[derive(Default)]
+struct FocusUnclaimedEditor {
+    has_focus: bool,
+}
+
+impl Operation<Message> for FocusUnclaimedEditor {
+    fn traverse(&mut self, operate: &mut dyn FnMut(&mut dyn Operation<Message>)) {
+        operate(self);
+    }
+
+    fn focusable(
+        &mut self,
+        _id: Option<&iced::advanced::widget::Id>,
+        _bounds: iced::Rectangle,
+        state: &mut dyn Focusable,
+    ) {
+        self.has_focus |= state.is_focused();
+    }
+
+    fn finish(&self) -> Outcome<Message> {
+        if self.has_focus {
+            Outcome::None
+        } else {
+            Outcome::Chain(Box::new(enzui_core::focus::RestoreFocus::new(editor_id())))
+        }
+    }
 }
 
 pub(crate) fn find_field_id() -> iced::advanced::widget::Id {

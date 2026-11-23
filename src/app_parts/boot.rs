@@ -632,6 +632,7 @@ impl TextApp {
 
         let mut app = Self {
             desktop: Default::default(),
+            startup_editor_focus: pending_startup.first().map(|open| open.token),
             model,
             dialog_focus: None,
             settings_focus: None,

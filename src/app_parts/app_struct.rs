@@ -5,6 +5,7 @@ use super::*;
 pub(crate) struct TextApp {
     pub(crate) tab_strip: crate::tab_strip::TabStripState,
     pub(crate) desktop: crate::desktop::Desktop,
+    pub(crate) startup_editor_focus: Option<large_doc::LoadToken>,
     pub(crate) model: Model,
     pub(crate) dialog_focus: Option<(
         crate::dialog_focus::DialogFocusKind,
