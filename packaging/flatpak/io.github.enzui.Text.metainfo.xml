@@ -50,6 +50,12 @@
     <name>enzUI contributors</name>
   </developer>
   <releases>
+    <release version="0.1.2" date="2026-11-23">
+      <description>
+        <p>Focus the editor when opening a file from a cold launch.</p>
+        <p>Update enzUI and its paired iced fork for nonblocking Wayland presentation discovery.</p>
+      </description>
+    </release>
     <release version="0.1.1" date="2026-11-20">
       <description>
         <p>Add Flatpak packaging for enzim Apps.</p>

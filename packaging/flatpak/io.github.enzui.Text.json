@@ -36,8 +36,8 @@
         },
         {
           "type": "archive",
-          "url": "https://github.com/enz1m/text/releases/download/v0.1.1/text-cargo-vendor-0.1.1.tar.xz",
-          "sha256": "2c080cabec371a63045c32a5cc8ea312dd553098b8f14e63f9a8fd171533f775",
+          "url": "https://github.com/enz1m/text/releases/download/v0.1.2/text-cargo-vendor-0.1.2.tar.xz",
+          "sha256": "eeb0c1db136cbf45de923804541d8f3d6ab5d9895bb1d507ead310ca6a3e8c86",
           "strip-components": 1
         },
         {
