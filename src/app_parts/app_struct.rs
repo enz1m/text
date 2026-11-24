@@ -128,6 +128,7 @@ pub(crate) struct TextApp {
     pub(crate) watcher_retry: Option<RetryPayload<Vec<(String, enzui_core::file_watch::ProbeOp)>>>,
     pub(crate) watcher_retry_paths: Vec<(String, PathBuf)>,
     pub(crate) watcher_retry_blocked: bool,
+    pub(crate) window_focused: bool,
     // A tick seeing a different generation records it and waits; seeing the
     // same one means the selection settled and permits one range scan.
     // Cleared on dispatch, on dialog open, and when nothing is wanted.

@@ -186,6 +186,7 @@ impl enzui_core::crash_report::MessageKind for Message {
             Self::PrintTick => "PrintTick",
             Self::DismissPrintStatus => "DismissPrintStatus",
             Self::FileWatchTick => "FileWatchTick",
+            Self::WindowFocusChanged(..) => "WindowFocusChanged",
             Self::FileWatchBatchSettled { .. } => "FileWatchBatchSettled",
             Self::CloseDrainTick => "CloseDrainTick",
             Self::BlockingRetryTick => "BlockingRetryTick",

@@ -275,6 +275,7 @@ pub(crate) enum Message {
     PrintTick,
     DismissPrintStatus,
     FileWatchTick,
+    WindowFocusChanged(bool),
     FileWatchBatchSettled {
         generation: u64,
         retry: RetryPayload<Vec<(String, enzui_core::file_watch::ProbeOp)>>,

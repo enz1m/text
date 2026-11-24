@@ -727,6 +727,7 @@ impl TextApp {
             watcher_retry: None,
             watcher_retry_paths: Vec::new(),
             watcher_retry_blocked: false,
+            window_focused: true,
             selection_settle_probe: None,
             gutter_window_first_line: std::cell::Cell::new(0),
             gutter_window_placement: std::cell::Cell::new(None),

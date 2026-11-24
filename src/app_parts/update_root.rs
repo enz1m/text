@@ -14,13 +14,18 @@ impl TextApp {
         let busy_blocking_terminal = message.is_busy_blocking_terminal();
         let blocking_retry_tick = matches!(message, Message::BlockingRetryTick);
         let close_drain_tick = matches!(message, Message::CloseDrainTick);
-        // A watch turn that changed nothing on screen skips the gutter sync,
-        // which is a second view rebuild.
+        // A quiet watch turn skips the gutter sync, view rebuild and repaint. A
+        // completion can admit queued work that shows, so prior debt is not quiet.
         let watch_turn = matches!(
             message,
             Message::FileWatchTick | Message::FileWatchBatchSettled { .. }
         )
-        .then(|| self.watch_visible_state());
+        .then(|| {
+            (
+                self.watch_visible_state(),
+                self.has_retryable_blocking_debt(),
+            )
+        });
         let unrelated_turn_with_retry_debt =
             self.blocking_retry_pending && !blocking_terminal && !blocking_retry_tick;
         let a11y_task = self.begin_a11y_turn(&message);
@@ -106,9 +111,12 @@ impl TextApp {
         self.blocking_retry_pending = self.has_retryable_blocking_debt();
         self.sync_desktop_activity();
         let quiet_watch_turn =
-            watch_turn.is_some_and(|before| before == self.watch_visible_state());
+            watch_turn.is_some_and(|(before, debt)| !debt && before == self.watch_visible_state());
         let task = if quiet_watch_turn {
-            task
+            Task::batch([
+                iced::window::invalidate(iced::window::Invalidation::none()),
+                task,
+            ])
         } else {
             task.chain(Task::done(Message::SyncGutterScroll))
         };
@@ -468,6 +476,7 @@ impl TextApp {
             Message::PrintTick => self.reduce_watch_print_tick(),
             Message::DismissPrintStatus => self.reduce_watch_dismiss_print_status(),
             Message::FileWatchTick => self.begin_watcher_batch(),
+            Message::WindowFocusChanged(focused) => self.reduce_watch_window_focus(focused),
 
             Message::FileWatchBatchSettled {
                 generation,

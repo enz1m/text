@@ -30,9 +30,9 @@ impl TextApp {
 
         // Timer-driven, never `iced::window::frames()`: a frame subscription
         // that outlives gestures turns redraws into a self-sustaining busy loop
-        // (see `FILE_WATCH_PROBE_INTERVAL`). Only path-backed tabs have watchers.
-        if self.model.tabs.iter().any(|t| t.watcher.is_some()) {
-            subs.push(iced::time::every(FILE_WATCH_PROBE_INTERVAL).map(|_| Message::FileWatchTick));
+        // (see `FILE_WATCH_PROBE_INTERVAL`).
+        if let Some(interval) = self.file_watch_probe_interval() {
+            subs.push(iced::time::every(interval).map(|_| Message::FileWatchTick));
         }
 
         // Exists only while revision debt is unpublished or a write is in
@@ -79,5 +79,18 @@ impl TextApp {
         }
 
         Subscription::batch(subs)
+    }
+
+    // Only path-backed tabs have watchers.
+    pub(crate) fn file_watch_probe_interval(&self) -> Option<std::time::Duration> {
+        self.model
+            .tabs
+            .iter()
+            .any(|t| t.watcher.is_some())
+            .then_some(if self.window_focused {
+                FILE_WATCH_PROBE_INTERVAL
+            } else {
+                FILE_WATCH_UNFOCUSED_PROBE_INTERVAL
+            })
     }
 }

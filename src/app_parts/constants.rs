@@ -2,9 +2,12 @@
 
 use super::*;
 
-// A timer, not `window::frames()`: each watch message redraws, so a per-frame
-// watch would never idle.
+// A timer, not `window::frames()`: each watch message runs an update, so a
+// per-frame watch would never idle.
 pub(crate) const FILE_WATCH_PROBE_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
+// Nobody is looking at an unfocused window; refocusing probes at once.
+pub(crate) const FILE_WATCH_UNFOCUSED_PROBE_INTERVAL: std::time::Duration =
+    std::time::Duration::from_secs(5);
 // A drag emits pointer events at display rate; the worker counts once after
 // the gesture settles.
 pub(crate) const SELECTION_STATS_DEBOUNCE: std::time::Duration =

@@ -91,6 +91,12 @@ pub(crate) fn classify_event_for_escape(
                 path.clone(),
             ])));
         }
+        iced::Event::Window(iced::window::Event::Focused) => {
+            return Some(Message::WindowFocusChanged(true));
+        }
+        iced::Event::Window(iced::window::Event::Unfocused) => {
+            return Some(Message::WindowFocusChanged(false));
+        }
         iced::Event::Window(iced::window::Event::Resized(size)) => {
             return Some(Message::Resized(size.width, size.height));
         }

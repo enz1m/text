@@ -65,6 +65,17 @@ impl TextApp {
             tab.externally_changed = true;
         }
     }
+    pub(crate) fn reduce_watch_window_focus(&mut self, focused: bool) -> Task<Message> {
+        let regained = focused && !self.window_focused;
+        self.window_focused = focused;
+        // The unfocused interval may have hidden an outside change for
+        // seconds; show it as soon as the user looks again.
+        if regained {
+            self.begin_watcher_batch()
+        } else {
+            Task::none()
+        }
+    }
     pub(crate) fn reduce_watch_file_watch_refresh(&mut self) -> Task<Message> {
         self.watcher_retry_blocked = false;
         self.watcher_retry = None;
