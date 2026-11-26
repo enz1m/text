@@ -11,6 +11,7 @@ const CELL_WIDTH: f32 = 180.0;
 const ACTION_WIDTH: f32 = enzui_widgets::titlebar_tab::DEFAULT_ROW_LIST_RESERVE;
 const GAP: f32 = 4.0;
 const MINIMUM_TAB_WIDTH: f32 = 120.0;
+const CLOSE_VISIBLE_FRACTION: f32 = 0.6;
 const PEEK_FRACTION: f32 = 1.0 / 3.0;
 pub(crate) const MINIMUM_WIDTH: f32 =
     MINIMUM_TAB_WIDTH * (1.0 + PEEK_FRACTION) + 2.0 * (ACTION_WIDTH + GAP);
@@ -55,6 +56,10 @@ impl TextApp {
                 available.min(count as f32 * CELL_WIDTH)
             };
             let width = tab_extent(extent, count);
+            let offset = self
+                .tab_strip
+                .offset
+                .clamp(0.0, (count as f32 * width - extent).max(0.0));
             let accent_palette = WorkspaceAccentPalette::for_mode(&self.palette());
             let strip = enz_document_tabs(
                 &self.model.doc_tabs,
@@ -67,6 +72,8 @@ impl TextApp {
                         .and_then(|tab| tab.workspace_root.as_deref())
                         .and_then(|root| self.workspaces.accent_for(root))
                         .map(|accent| accent_palette.resolve(accent));
+                    let leading = ctx.position.saturating_sub(1) as f32 * width;
+                    let visible = (leading + width).min(offset + extent) - leading.max(offset);
                     let cell = enzui_widgets::document_tab::enz_document_tab(
                         item.title.clone(),
                         Message::SwitchTab(id.clone()),
@@ -79,7 +86,7 @@ impl TextApp {
                     .set_position(ctx.position, ctx.count)
                     .modified(tab.is_some_and(|tab| tab.dirty))
                     .favicon_size(10.0)
-                    .close_visible(width >= 100.0)
+                    .close_visible(width >= 100.0 && visible >= width * CLOSE_VISIBLE_FRACTION)
                     .tab_min_width((width - 2.0).max(1.0))
                     .tab_max_width((width - 2.0).max(1.0))
                     .fill_width(true)
@@ -103,7 +110,7 @@ impl TextApp {
                 },
             )
             .extent(extent)
-            .scroll_offset(self.tab_strip.offset)
+            .scroll_offset(offset)
             .overscan(2)
             .hide_scrollbar(true)
             .height(Length::Fill)
